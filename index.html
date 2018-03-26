@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<HTML lang="en">
+  <HEAD>
+    <meta charset="utf-8">
+    <TITLE>D3 Page Template</TITLE>
+    <style>
+
+    </style>
+    <script type="text/javascript" src="d3/d3.js"></script>
+  </HEAD>
+  <BODY>
+    <script type="text/javascript">
+    var barPadding = 1;
+    var margin = {top: 20, right: 10, bottom: 20, left: 10}; //Mike Bostock’s margin convention
+    var defaultChartWidth = 500 - margin.right - margin.left;
+    var defaultChartHeight = 500 - margin.top - margin.bottom;
+    var dataset;
+    var yScale;
+    var chart_1 = d3.select("body")
+                      .append("svg")
+                      .attr("width", defaultChartWidth + margin.right + margin.left)
+                      .attr("height", defaultChartHeight + margin.top + margin.bottom)
+                      .append("g") //Mike Bostock’s margin convention
+                      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    d3.csv("data/president-data.csv", function(error,data) {
+
+        if (error) {                        //If error is not null, something went wrong.
+          console.log(error);               //Log the error.
+        } else {                            //If no error, the file loaded correctly. Yay!
+          dataset = data;                   //Log the data.
+        }
+
+        // 1. prepare scale
+
+        yScale = d3.scaleLinear()
+                  .domain([
+                    // d3.min(dataset, function(d) {
+                    //       return d.Weeks;
+                    //       })
+                          0,
+                    d3.max(dataset, function(d) {
+                          return d.Weeks;
+                          })
+                    ])
+                  .range([0, defaultChartHeight]);
+
+        // 2. prepare chart and apply scale
+
+        chart_1.selectAll("rect")
+        .data(dataset)
+        .enter()
+        .append("rect")
+        .attr("x", function(d, i) {
+                            return i * (defaultChartWidth / dataset.length);
+        })
+        .attr("y", function(d) {
+            return  defaultChartHeight - yScale(d.Weeks);
+        })
+        .attr("height", function(d) {
+            return yScale(d.Weeks);
+        })
+        .attr("width", defaultChartWidth / dataset.length - barPadding)
+        .attr("fill", function(d) {
+            return "rgb(0, 0, " + (d.Weeks*2) + ")";
+        });
+
+        chart_1.selectAll("text")
+        .data(dataset)
+        .enter()
+        .append("text")
+        .text(function(d) {
+              return d.President;
+        })
+        .attr("x", function(d, i) {
+                            return i * (defaultChartWidth / dataset.length);
+        })
+        .attr("y", function(d) {
+          return defaultChartHeight - yScale(d.Weeks);
+        })
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "12px");
+
+    });
+
+
+    </script>
+  </BODY>
+</HTML>
